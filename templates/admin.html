@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bezpieczny panel zarządzania serwerem Tortuga.">
+  <title>Panel serwera — Tortuga</title>
+  <style>
+    :root { color-scheme: dark; font: 15px/1.55 "Segoe UI", sans-serif;
+      color: #e8eef8; background: #07111f; }
+    body { margin: 0; }
+    main { max-width: 1100px; margin: 28px auto; padding: 22px; }
+    h1, h2, h3 { color: #fff; }
+    h1 { margin: 0; }
+    header { display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; margin-bottom: 20px; }
+    header a { color: #8bc4ff; }
+    section { margin: 20px 0; padding: 20px;
+      border: 1px solid #2a3d55; border-radius: 15px; background: #111e30; }
+    label { display: inline-grid; gap: 5px; margin: 6px 12px 6px 0; }
+    input, select, button { padding: 9px 11px; border: 1px solid #354b67;
+      border-radius: 7px; color: #e8eef8; background: #0a1626; font: inherit; }
+    button { border: 0; background: #326ee8; cursor: pointer; }
+    button:hover { background: #408aff; }
+    .danger { background: #a52f46; }
+    .danger:hover { background: #c03d57; }
+    .notice { padding: 12px; border: 1px solid #354b67;
+      border-radius: 9px; background: #17273d; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 9px; border-bottom: 1px solid #2a3d55;
+      text-align: left; }
+    .muted { color: #a9bad0; font-size: .92em; }
+    @media (max-width: 700px) {
+      main { margin: 0 auto; padding: 14px; }
+      section { padding: 15px; overflow-x: auto; }
+      header { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Panel serwera Tortuga</h1>
+    <a href="/">Powrót do strony głównej</a>
+  </header>
+  <p class="muted">Panel wymaga zalogowania właściciela. Lista online obejmuje
+    wyłącznie połączenia z tym serwerem.</p>
+
+  {% if status == "updated" %}
+    <p class="notice">Zmiana została zapisana.</p>
+  {% endif %}
+
+  <p class="notice">Zalogowano jako administrator (UID {{ uid|e }}).
+    Możesz zarządzać rangami moderatorów, zmieniać poziomy, wysyłać ogłoszenia
+    oraz zarządzać karami.</p>
+
+  <section>
+    <h2>Role i moderatorzy</h2>
+    <p class="muted">Nie można nadać rangi 5 — jest zarezerwowana dla właściciela.
+      Możesz nadać rangi 1–4 lub wybrać rangę 0, aby odebrać uprawnienia
+      moderatora. Istniejące rangi 5 innych kont są widoczne na liście i można
+      je obniżyć. Zmiana działa od razu przy kolejnych akcjach w grze.</p>
+    <form method="post" action="/admin/action">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>UID gracza
+        <input name="uid" inputmode="numeric" pattern="[0-9]+" required>
+      </label>
+      <label>Rola
+        <select name="role" required>
+          <option value="0">0 — Gracz</option>
+          <option value="1">1 — Stażysta moderatora</option>
+          <option value="2">2 — Moderator</option>
+          <option value="3">3 — Starszy moderator</option>
+          <option value="4">4 — Kurator</option>
+        </select>
+      </label>
+      <button name="action" value="set_role">Zapisz rolę</button>
+    </form>
+
+    <h3>Przypisane role</h3>
+    {% if moderators %}
+    <table>
+      <thead><tr><th>UID</th><th>Nazwa</th><th>Rola</th></tr></thead>
+      <tbody>
+      {% for moderator in moderators %}
+        <tr>
+          <td>{{ moderator.uid|e }}</td>
+          <td>{{ moderator.name|e }}</td>
+          <td>{{ moderator.role_name|e }} ({{ moderator.role|e }})</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p>Nie przypisano jeszcze dodatkowych ról.</p>
+    {% endif %}
+  </section>
+
+  <section>
+      <h2>Gracze online: {{ players|length }}</h2>
+      {% if players %}
+      <table>
+        <thead><tr><th>UID</th><th>Nazwa</th><th>Poziom</th>
+          <th>Ban konta</th><th>Ban IP</th><th>Wyciszenie</th></tr></thead>
+        <tbody>
+        {% for player in players %}
+          <tr>
+            <td>{{ player.uid|e }}</td>
+            <td>{{ player.name|e }}</td>
+            <td>{{ player.level|e }}</td>
+            <td>{{ "tak" if player.banned else "nie" }}</td>
+            <td>{{ "tak" if player.ip_banned else "nie" }}</td>
+            <td>{{ "tak" if player.muted else "nie" }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p>Aktualnie nie ma zalogowanych graczy.</p>
+      {% endif %}
+      <p class="muted">Odśwież stronę, aby pobrać aktualną listę.</p>
+  </section>
+
+    <section>
+      <h2>Moderacja</h2>
+      <form method="post" action="/admin/action">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>UID gracza
+          <input name="uid" inputmode="numeric" pattern="[0-9]+" required>
+        </label>
+        <label>Czas kary w minutach (0 = bezterminowo)
+          <input name="minutes" type="number" min="0" value="60">
+        </label>
+        <label>Treść ostrzeżenia
+          <input name="message" maxlength="500">
+        </label>
+        <div>
+          <button name="action" value="ban" class="danger">Zbanuj</button>
+          <button name="action" value="unban">Zdejmij bana</button>
+          {% if ip_bans_enabled %}
+          <button name="action" value="ban_ip" class="danger">Zablokuj IP</button>
+          <button name="action" value="unban_ip">Odblokuj IP</button>
+          {% else %}
+          <button type="button" disabled title="Wymagana konfiguracja proxy">
+            Blokady IP niedostępne
+          </button>
+          {% endif %}
+          <button name="action" value="mute" class="danger">Wycisz</button>
+          <button name="action" value="unmute">Zdejmij wyciszenie</button>
+          <button name="action" value="warn">Wyślij ostrzeżenie</button>
+        </div>
+      </form>
+      {% if ip_bans_enabled %}
+      <p class="muted">
+        Blokada IP dotyczy ostatniego adresu, z którego konto połączyło się
+        z grą. Może zablokować także inne osoby korzystające z tego samego
+        łącza. Adresy nie są zapisywane jawnie.
+      </p>
+      {% else %}
+      <p class="muted">
+        Blokady IP są wyłączone. W hostingu za proxy skonfiguruj
+        TRUSTED_PROXY_CIDRS, aby serwer mógł bezpiecznie rozpoznać adres gracza.
+      </p>
+      {% endif %}
+  </section>
+
+    <section>
+      <h2>Poziom gracza</h2>
+      <form method="post" action="/admin/action">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>UID gracza
+          <input name="uid" inputmode="numeric" pattern="[0-9]+" required>
+        </label>
+        <label>Nowy poziom
+          <input name="level" type="number" min="1" required>
+        </label>
+        <button name="action" value="set_level">Zapisz poziom</button>
+      </form>
+      <p class="muted">Poziom jest zapisywany jako doświadczenie. Zmiana
+        nie ustawia automatycznie poziomu właściciela.</p>
+  </section>
+
+    <section>
+      <h2>Ogłoszenie dla graczy online</h2>
+      <form method="post" action="/admin/action">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>Wiadomość (maks. 500 znaków)
+          <input name="message" maxlength="500" required>
+        </label>
+        <button name="action" value="broadcast">Wyślij ogłoszenie</button>
+      </form>
+  </section>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv-app/Scripts/python.exe",
+    "chat.agent.sandbox.network.allowLocalNetwork": false,
+    "chat.agent.sandbox.enabled": "on",
+    "terminal.integrated.defaultProfile.windows": "Windows PowerShell"
+}

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+	<title>Tortuga — serwer Avatarion</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description"
+		content="Tortuga — społeczność serwera Avatarion. Zaloguj się, poznaj zasady i dołącz do gry.">
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+	<style>
+		:root {
+			color-scheme: dark;
+			font: 16px/1.5 "Segoe UI", sans-serif;
+			color: #e8eef8;
+			background: #07111f;
+			--surface: #111e30;
+			--surface-raised: #17273d;
+			--border: #2a3d55;
+			--muted: #a9bad0;
+			--accent: #56a8ff;
+		}
+		* { box-sizing: border-box; }
+		body {
+			min-height: 100vh;
+			margin: 0;
+			background:
+				radial-gradient(ellipse at 12% 0%, #143458 0, transparent 38%),
+				radial-gradient(ellipse at 100% 80%, #172844 0, transparent 35%),
+				#07111f;
+		}
+		a { color: #8bc4ff; }
+		button, input { font: inherit; }
+		.page-shell { width: min(1200px, 100% - 36px); margin: 0 auto; }
+		.site-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			padding: 22px 0;
+		}
+		.brand {
+			display: inline-flex;
+			align-items: center;
+			gap: 11px;
+			color: #fff;
+			font-size: 1.15rem;
+			font-weight: 750;
+			letter-spacing: .03em;
+			text-decoration: none;
+		}
+		.brand-mark {
+			display: grid;
+			width: 40px;
+			height: 40px;
+			place-items: center;
+			border-radius: 13px;
+			background: linear-gradient(145deg, #70bbff, #356de2);
+			box-shadow: 0 8px 26px #347fe755;
+		}
+		.site-nav { display: flex; flex-wrap: wrap; gap: 18px; }
+		.site-nav a { color: var(--muted); text-decoration: none; }
+		.site-nav a:hover { color: #fff; }
+		.hero {
+			display: grid;
+			grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr);
+			gap: 32px;
+			align-items: center;
+			padding: 52px 0 70px;
+		}
+		.hero-copy h1 {
+			max-width: 680px;
+			margin: 12px 0;
+			color: #fff;
+			font-size: clamp(2.4rem, 6vw, 4.5rem);
+			line-height: 1.05;
+			letter-spacing: -.045em;
+		}
+		.hero-copy p { max-width: 620px; color: var(--muted); font-size: 1.08rem; }
+		.eyebrow {
+			color: #83c4ff;
+			font-size: .78rem;
+			font-weight: 700;
+			letter-spacing: .14em;
+			text-transform: uppercase;
+		}
+		.card {
+			padding: 26px;
+			border: 1px solid var(--border);
+			border-radius: 20px;
+			background: linear-gradient(160deg, #17273df2, #0d1929f5);
+			box-shadow: 0 22px 70px #0005;
+		}
+		.card h2 { margin: 0 0 8px; color: #fff; }
+		.muted { color: var(--muted); }
+		.login-form { display: grid; gap: 14px; margin-top: 20px; }
+		.login-form label { display: grid; gap: 6px; color: var(--muted); }
+		.login-form input {
+			width: 100%;
+			padding: 12px 14px;
+			border: 1px solid #354b67;
+			border-radius: 10px;
+			background: #0a1626;
+			color: #fff;
+		}
+		.button, .login-form button, #clickMe {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 44px;
+			padding: 10px 16px;
+			border: 0;
+			border-radius: 10px;
+			background: linear-gradient(135deg, #409cff, #326ee8);
+			color: #fff;
+			font-weight: 700;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		.button.secondary { border: 1px solid var(--border); background: #192b42; }
+		.form-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+		.demo-banner, .notice {
+			margin: 12px 0;
+			padding: 12px 16px;
+			border: 1px solid #715b2d;
+			border-radius: 10px;
+			background: #382d17;
+			color: #ffe2a1;
+		}
+		.game-shell { padding-bottom: 48px; }
+		.player-greeting { margin: 8px 0 20px; color: var(--muted); }
+		.player-greeting strong { color: #fff; font-size: 1.1rem; }
+		.role-badge {
+			display: inline-block;
+			margin-left: 7px;
+			padding: 1px 8px;
+			border: 1px solid #3c96ff;
+			border-radius: 999px;
+			background: #123b68;
+			color: #b7dcff;
+			font-size: .8rem;
+			font-weight: 800;
+			letter-spacing: .04em;
+		}
+		.game-layout {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) 290px;
+			gap: 20px;
+			align-items: start;
+		}
+		.game-card, .settings-card {
+			padding: 20px;
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			background: #0d1929eF;
+		}
+		.game-card { min-width: 0; }
+		.game-card h1 { margin: 0; color: #fff; font-size: 1.35rem; }
+		.settings-card h2 { margin: 0 0 5px; color: #fff; font-size: 1.1rem; }
+		.settings-card p { color: var(--muted); }
+		.setting-toggle {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 14px 0;
+			border-top: 1px solid var(--border);
+			border-bottom: 1px solid var(--border);
+		}
+		.switch {
+			position: relative;
+			display: inline-block;
+			width: 48px;
+			height: 27px;
+			flex: 0 0 auto;
+		}
+		.switch input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+		.switch-track {
+			position: absolute;
+			inset: 0;
+			border-radius: 20px;
+			background: #53647a;
+			cursor: pointer;
+			transition: background .2s ease;
+		}
+		.switch-track::after {
+			position: absolute;
+			top: 3px;
+			left: 3px;
+			width: 21px;
+			height: 21px;
+			border-radius: 50%;
+			background: #fff;
+			content: "";
+			transition: transform .2s ease;
+		}
+		.switch input:checked + .switch-track { background: #287ce0; }
+		.switch input:checked + .switch-track::after { transform: translateX(21px); }
+		.switch input:focus-visible + .switch-track { outline: 3px solid #a6d4ff; }
+		.settings-card .button { width: 100%; margin-top: 16px; }
+		.site-footer {
+			padding: 22px 0 34px;
+			border-top: 1px solid #203249;
+			color: var(--muted);
+			font-size: .9rem;
+		}
+		#gameProgress {
+			height: 18px;
+			margin: 10px 0;
+			overflow: hidden;
+			border: 1px solid #435875;
+			border-radius: 9px;
+			background: #182941;
+		}
+		#gameProgressFill {
+			width: 0;
+			height: 100%;
+			background: linear-gradient(90deg, #43b7ff, #4a80ff);
+			transition: width 180ms ease;
+		}
+		#flashContent {
+			min-height: 480px;
+			margin-top: 14px;
+			overflow: hidden;
+			border-radius: 12px;
+			background: #03070c;
+		}
+		#flashContent ruffle-player {
+			display: block;
+			width: 100%;
+			height: min(650px, 72vh);
+			min-height: 420px;
+		}
+		@media (max-width: 760px) {
+			.hero, .game-layout { grid-template-columns: 1fr; }
+			.hero { padding: 28px 0 42px; }
+			.site-header { align-items: flex-start; }
+			.site-nav { justify-content: flex-end; gap: 10px 14px; }
+			.page-shell { width: min(100% - 24px, 1200px); }
+		}
+		@media (max-width: 480px) {
+			.site-header { flex-direction: column; }
+			.site-nav { justify-content: flex-start; }
+			.card, .game-card, .settings-card { padding: 18px; }
+			#flashContent { min-height: 360px; }
+			#flashContent ruffle-player { min-height: 360px; }
+		}
+	</style>
+	{% if token and ruffle_available %}
+	<script>
+		const gameAssetsBase = new URL(
+			{{ asset_base_url|tojson }}, window.location.href
+		);
+		const ruffleAssetsBase = new URL(
+			{{ ruffle_base_url|tojson }}, window.location.href
+		);
+		window.RufflePlayer = window.RufflePlayer || {};
+		const gameSocketUrl = new URL("/game-socket", {{ public_base_url|tojson }});
+		gameSocketUrl.protocol =
+			window.location.protocol === "https:" ? "wss:" : "ws:";
+		window.RufflePlayer.config = {
+			publicPath: ruffleAssetsBase.href,
+			autoplay: "on",
+			socketProxy: [{
+				host: {{ game_socket_host|tojson }},
+				port: 8123,
+				proxyUrl: gameSocketUrl.href
+			}]
+		};
+	</script>
+	<script src="{{ ruffle_base_url }}ruffle.js"></script>
+	{% endif %}
+</head>
+<body>
+	<div class="page-shell">
+		<header class="site-header">
+			<a class="brand" href="/" aria-label="Tortuga — strona główna">
+				<span class="brand-mark" aria-hidden="true">T</span>
+				<span>Tortuga <span class="muted">/ Avatarion</span></span>
+			</a>
+			<nav class="site-nav" aria-label="Nawigacja główna">
+				<a href="/">Strona główna</a>
+				<a href="/regulamin">Regulamin</a>
+				{% if token and is_admin %}
+				<a href="/admin">Panel serwera</a>
+				{% endif %}
+				{% if token and owner_claim_available %}
+				<a href="/admin/claim">Ustaw właściciela</a>
+				{% endif %}
+				{% if token %}
+				<a href="/logout">Wyloguj się</a>
+				{% endif %}
+			</nav>
+		</header>
+		{% if demo_mode %}
+		<p class="demo-banner" role="note">
+			Tryb demonstracyjny używa syntetycznych zasobów. To nie jest pełna
+			gra ani publiczny serwer rozgrywki.
+		</p>
+		{% endif %}
+		{% if not token %}
+		<main class="hero">
+			<section class="hero-copy">
+				<span class="eyebrow">Społeczność • przygoda • własny świat</span>
+				<h1>Witaj na Tortudze</h1>
+				<p>
+					Poznaj graczy, rozwijaj swoją postać i odkrywaj świat
+					Avatarion. Zaloguj się, aby przejść do gry.
+				</p>
+				<p class="muted">
+					Adres tej instancji:
+					<strong>{{ public_base_url|e }}</strong>
+				</p>
+				<a class="button secondary" href="/regulamin">
+					Poznaj grę i przeczytaj regulamin
+				</a>
+			</section>
+			<section class="card auth-card" aria-labelledby="login-heading">
+				<h2 id="login-heading">Dołącz do gry</h2>
+				<p class="muted">Zaloguj się na swoje konto Avatarion.</p>
+				<form method="post" action="/login" class="login-form">
+					<label for="login">Identyfikator użytkownika
+						<input id="login" type="text" name="login"
+							autocomplete="username" required>
+					</label>
+					<label for="password">Hasło
+						<input id="password" type="password" name="password"
+							autocomplete="current-password" required>
+					</label>
+					<button type="submit">Zaloguj się</button>
+				</form>
+				<div class="form-actions" style="margin-top: 12px">
+					<form method="post" action="/register">
+						<button class="button secondary" type="submit">
+							Utwórz konto
+						</button>
+					</form>
+					{% if google_login_enabled %}
+					<a class="button secondary" href="/auth/google">
+						Zaloguj przez Google
+					</a>
+					{% endif %}
+				</div>
+			</section>
+		</main>
+		<footer class="site-footer">
+			Tortuga — serwer społeczności Avatarion.
+			<a href="/regulamin">Zasady i informacje dla graczy</a>
+		</footer>
+		{% else %}
+		<main class="game-shell">
+			<p class="player-greeting">
+				Zalogowano jako <strong>{{ player_name|e }}</strong>
+				{% if badge_visible and role_badge %}
+				<span class="role-badge">{{ role_badge|e }}</span>
+				{% endif %}
+			</p>
+			{% if badge_status == "updated" %}
+			<p class="notice" role="status">
+				Ustawienie zapisano. Serwer odświeży dane awatara; jeśli plakietka
+				nie zmieni się od razu, wyjdź z gry i wejdź ponownie.
+			</p>
+			{% elif badge_status == "saved_pending_refresh" %}
+			<p class="notice" role="status">
+				Ustawienie zapisano. Zmiana w grze pojawi się po ponownym
+				połączeniu, ponieważ serwer gry jest obecnie offline.
+			</p>
+			{% endif %}
+			<div class="game-layout">
+				<section class="game-card" aria-labelledby="game-heading">
+					<div>
+						<h1 id="game-heading">
+							{% if demo_mode %}Podgląd wdrożenia{% else %}Świat Avatarion{% endif %}
+						</h1>
+						<p class="muted">
+							{% if demo_mode %}
+							To środowisko sprawdza zasoby i połączenie, ale nie uruchamia rozgrywki.
+							{% else %}
+							Uruchom klienta, aby połączyć się z serwerem gry.
+							{% endif %}
+						</p>
+					</div>
+					<input id="clickMe" type="button"
+						value="{% if demo_mode %}Sprawdź wdrożenie{% else %}Uruchom grę{% endif %}"
+						onclick="start();"/>
+					<p id="gameStatus" role="status" aria-live="polite">
+						{% if not ruffle_available %}
+						Brakuje pakietu Ruffle Web. Skonfiguruj dostępny pakiet
+						Ruffle, aby uruchomić klienta gry.
+						{% endif %}
+					</p>
+					<div id="gameProgress" role="progressbar"
+						aria-label="Postęp startu gry" aria-valuemin="0"
+						aria-valuemax="100" aria-valuenow="0" hidden>
+						<div id="gameProgressFill"></div>
+					</div>
+					<p id="gameProgressText"></p>
+					<div id="flashContent"></div>
+				</section>
+				<aside class="settings-card" aria-labelledby="settings-heading">
+					<span class="eyebrow">Twoje konto</span>
+					<h2 id="settings-heading">Ustawienia gracza</h2>
+					<p>Nick: <strong>{{ player_name|e }}</strong></p>
+					<p>
+						Podgląd plakietki:
+						{% if badge_visible and role_badge %}
+						<span class="role-badge">{{ role_badge|e }}</span>
+						{% elif role_badge %}
+						<span class="muted">ukryta</span>
+						{% else %}
+						<span class="muted">brak przypisanej rangi</span>
+						{% endif %}
+					</p>
+					<form method="post" action="/settings/role-badge">
+						<input type="hidden" name="csrf_token"
+							value="{{ settings_csrf_token|e }}">
+						<input type="hidden" name="show_role_badge" value="0">
+						<label class="setting-toggle" for="show-role-badge">
+							<span>Pokazuj plakietkę rangi przy nicku</span>
+							<span class="switch">
+								<input id="show-role-badge" type="checkbox"
+									name="show_role_badge" value="1"
+									{% if badge_visible %}checked{% endif %}>
+								<span class="switch-track" aria-hidden="true"></span>
+							</span>
+						</label>
+						<button class="button" type="submit">Zapisz ustawienie</button>
+					</form>
+					<p class="muted">
+						Zmiana dotyczy widoczności rangi przy Twojej postaci.
+						Nie zmienia uprawnień nadanych przez serwer.
+					</p>
+					{% if google_login_enabled %}
+					<a href="/auth/google/link">Połącz konto Google</a>
+					{% endif %}
+				</aside>
+			</div>
+		</main>
+		<footer class="site-footer">
+			{% if ip_bans_enabled %}
+			Blokady IP są dostępne dla właściciela serwera; mogą obejmować
+			inne osoby korzystające z tego samego łącza.
+			{% else %}
+			Blokady IP są wyłączone do czasu konfiguracji zaufanych proxy.
+			{% endif %}
+		</footer>
+		{% endif %}
+	</div>
+	{% if token %}
+	<script>
+		const gameButton = document.getElementById("clickMe");
+		const gameStatus = document.getElementById("gameStatus");
+		const gameProgress = document.getElementById("gameProgress");
+		const gameProgressFill = document.getElementById("gameProgressFill");
+		const gameProgressText = document.getElementById("gameProgressText");
+		let gamePlayer = null;
+		let loadTimer = null;
+		let gameStatusTimer = null;
+		let gameServerConnected = false;
+		let gameAuthenticated = false;
+		let gameSocketAttempts = 0;
+		let gameSocketBaseline = 0;
+		let gameBytesSent = 0;
+		let gameConnectionBaseline = null;
+
+		function setProgress(percent, message) {
+			const value = Math.max(0, Math.min(100, percent));
+			gameProgress.hidden = false;
+			gameProgress.setAttribute("aria-valuenow", String(value));
+			gameProgressFill.style.width = value + "%";
+			gameProgressText.textContent = value + "% — " + message;
+		}
+
+		function showStartError(message) {
+			window.clearTimeout(loadTimer);
+			window.clearInterval(gameStatusTimer);
+			gameStatus.textContent = message;
+			gameButton.hidden = false;
+			gameButton.disabled = false;
+			gameButton.value = "Spróbuj ponownie";
+		}
+
+		async function checkGameFiles() {
+			const manifestResponse = await fetch(
+				new URL("versions.json?{{ update_time }}", gameAssetsBase),
+				{ cache: "no-store" }
+			);
+			if (!manifestResponse.ok) {
+				throw new Error("Nie można pobrać mapy plików gry.");
+			}
+			const manifest = await manifestResponse.json();
+			const versionedFiles = [
+				"swf/Ui.swf",
+				"swf/UiInit.swf",
+				"swf/UiLang_pl.swf",
+				"swf/AvatarIcons.swf",
+				"swf/AvatarAnimation.swf",
+				"data/config_fb_pl.zip"
+			].map(function (path) {
+				const hash = manifest[path];
+				const extensionIndex = path.lastIndexOf(".");
+				if (!hash || extensionIndex < 0) {
+					throw new Error("Brak wpisu w versions.json: " + path);
+				}
+				return new URL(
+					path.slice(0, extensionIndex) + "_" + hash
+						+ path.slice(extensionIndex),
+					gameAssetsBase
+				).href;
+			});
+			const files = [
+				new URL("ruffle.js", ruffleAssetsBase).href,
+				new URL(
+					"core.ruffle.16d61072ac7fdc4d5013.js",
+					ruffleAssetsBase
+				).href,
+				new URL(
+					"core.ruffle.994eeef0a471a88cd0e3.js",
+					ruffleAssetsBase
+				).href,
+				new URL(
+					"172de42e6619eac8f371.wasm",
+					ruffleAssetsBase
+				).href,
+				new URL(
+					"878d548199cddef07035.wasm",
+					ruffleAssetsBase
+				).href,
+				new URL(
+					"pnz-city-container.swf?{{ update_time }}",
+					gameAssetsBase
+				).href,
+				new URL("pnz-city.swf?{{ update_time }}", gameAssetsBase).href,
+				"/appconfig.xml",
+				...versionedFiles
+			];
+			for (let index = 0; index < files.length; index += 1) {
+				const response = await fetch(files[index], {
+					method: "HEAD",
+					cache: "no-store"
+				});
+				if (!response.ok) {
+					throw new Error(
+						"Brak pliku gry (" + response.status + "): " + files[index]
+					);
+				}
+				setProgress(
+					Math.round((index + 1) / files.length * 60),
+					"Sprawdzanie plików gry (" + (index + 1) + "/" + files.length + ")"
+				);
+			}
+		}
+
+		async function pollGameServer() {
+			try {
+				const response = await fetch("/game-status", {
+					cache: "no-store"
+				});
+				if (!response.ok) {
+					throw new Error("Serwer WWW zwrócił " + response.status);
+				}
+				const state = await response.json();
+				if (typeof state.authenticated !== "boolean") {
+					throw new Error("Serwer WWW zwrócił nieprawidłowy stan logowania gry.");
+				}
+				if (state.gameConnectionId !== null
+						&& typeof state.gameConnectionId !== "string") {
+					throw new Error("Serwer WWW zwrócił nieprawidłowy identyfikator połączenia gry.");
+				}
+				if (state.authenticated && state.gameConnectionId
+						&& state.gameConnectionId !== gameConnectionBaseline) {
+					gameAuthenticated = true;
+					window.clearTimeout(loadTimer);
+					setProgress(100, "Logowanie klienta potwierdzone przez serwer gry");
+					gameStatus.textContent =
+						"Gra załadowana; połączenie z serwerem zostało uwierzytelnione.";
+					return;
+				}
+				if (gameAuthenticated) {
+					gameAuthenticated = false;
+					showStartError(
+						"Serwer gry zakończył uwierzytelnione połączenie. " +
+						"Sprawdź logs/game.log."
+					);
+					return;
+				}
+				gameSocketAttempts = Math.max(
+					0, state.connections - gameSocketBaseline
+				);
+				gameBytesSent = state.bytesToGame;
+				if (state.connected) {
+					gameServerConnected = true;
+					if (gameBytesSent > 0) {
+						setProgress(90, "Klient wysyła dane do serwera gry");
+						gameStatus.textContent =
+							"Oczekiwanie na odpowiedź serwera i start interfejsu Avatarii…";
+					} else {
+						gameStatus.textContent =
+							"Połączenie otwarte; klient nie wysłał jeszcze pakietu logowania…";
+					}
+				} else if (gameServerConnected) {
+					gameServerConnected = false;
+					showStartError(
+						gameBytesSent > 0
+							? "Serwer gry zamknął połączenie po otrzymaniu danych. " +
+								"Sprawdź logs/game.log: logowanie mogło zostać odrzucone."
+							: "Klient otworzył połączenie, ale nie wysłał danych logowania. " +
+								"Sprawdź parametry klienta gry i Ruffle."
+					);
+				}
+			} catch {
+				showStartError(
+					"Nie można sprawdzić połączenia z serwerem gry. " +
+					"Sprawdź połączenie z internetem i spróbuj ponownie."
+				);
+			}
+		}
+
+        function start(){
+            if (!window.RufflePlayer
+					|| typeof window.RufflePlayer.newest !== "function") {
+				showStartError(
+					"Nie udało się załadować Ruffle z wybranego źródła zasobów. " +
+					"Sprawdź GAME_ASSETS_URL, CORS i plik ruffle/ruffle.js."
+				);
+                return;
+            }
+			gameButton.disabled = true;
+			gameButton.hidden = true;
+			gameServerConnected = false;
+			gameAuthenticated = false;
+			gameSocketAttempts = 0;
+			gameBytesSent = 0;
+			window.clearTimeout(loadTimer);
+			window.clearInterval(gameStatusTimer);
+			gameStatus.textContent = "Przygotowywanie gry…";
+			setProgress(0, "Start");
+			if (gamePlayer) {
+				gamePlayer.remove();
+				gamePlayer = null;
+			}
+			(async function () {
+				try {
+					await checkGameFiles();
+					const statusResponse = await fetch("/game-status", {
+						cache: "no-store"
+					});
+					if (!statusResponse.ok) {
+						throw new Error(
+							"Nie można sprawdzić stanu serwera gry (" +
+							statusResponse.status + ")."
+						);
+					}
+					const initialState = await statusResponse.json();
+					{% if demo_mode %}
+					if (!Number.isInteger(initialState.connections)
+							|| initialState.connections < 0
+							|| typeof initialState.connected !== "boolean") {
+						throw new Error(
+							"Serwer WWW zwrócił nieprawidłowy stan testowy."
+						);
+					}
+					setProgress(100, "Test zasobów i endpointu serwera zakończony");
+					gameStatus.textContent =
+						"Zasoby zastępcze i endpoint serwera odpowiadają. " +
+						"Puste SWF-y nie zawierają interfejsu gry ani rozgrywki.";
+					gameButton.hidden = false;
+					gameButton.disabled = false;
+					gameButton.value = "Uruchom test ponownie";
+					return;
+					{% endif %}
+					if (!Number.isInteger(initialState.connections)
+							|| initialState.connections < 0) {
+						throw new Error("Serwer WWW zwrócił nieprawidłowy licznik połączeń.");
+					}
+					gameSocketBaseline = initialState.connections;
+					if (initialState.gameConnectionId !== null
+							&& typeof initialState.gameConnectionId !== "string") {
+						throw new Error(
+							"Serwer WWW zwrócił nieprawidłowy identyfikator połączenia gry."
+						);
+					}
+					gameConnectionBaseline = initialState.gameConnectionId;
+					setProgress(70, "Uruchamianie emulatora Ruffle");
+					gamePlayer = window.RufflePlayer.newest().createPlayer();
+					document.getElementById("flashContent").appendChild(gamePlayer);
+					gamePlayer.addEventListener("loadedmetadata", function () {
+						setProgress(80, "Uruchomiono preloader klienta Avatarii");
+						gameStatus.textContent =
+							"Ładowanie klienta Avatarii i oczekiwanie na serwer gry…";
+					});
+					gamePlayer.addEventListener("loadeddata", function () {
+						setProgress(82, "Preloader uruchomiony; czekam na interfejs gry");
+						gameStatus.textContent =
+							"Preloader działa. Ładowanie interfejsu i łączenie z serwerem…";
+					});
+					gamePlayer.addEventListener("error", function () {
+						showStartError(
+							"Ruffle napotkał błąd podczas uruchamiania. " +
+							"Sprawdź log konsoli okna gry."
+						);
+					});
+					setProgress(80, "Ładowanie klienta gry");
+					gameStatus.textContent = "Ładowanie klienta gry i interfejsu…";
+					pollGameServer();
+					gameStatusTimer = window.setInterval(pollGameServer, 1500);
+					loadTimer = window.setTimeout(function () {
+						if (!gameServerConnected) {
+							if (gameSocketAttempts > 0 && gameBytesSent === 0) {
+								showStartError(
+									"Klient otwiera połączenie, ale nie wysyła pakietu logowania. " +
+									"Sprawdź logs/game.log i konfigurację klienta."
+								);
+							} else if (gameBytesSent > 0) {
+								showStartError(
+									"Klient wysłał dane, ale serwer zamknął połączenie przed " +
+									"uruchomieniem interfejsu. Sprawdź logs/game.log."
+								);
+							} else {
+								showStartError(
+									"Klient nie połączył się z serwerem gry na porcie 8123. " +
+									"Sprawdź, czy serwer gry działa i czy Ruffle otworzył połączenie."
+								);
+							}
+						} else {
+							showStartError(
+								"Połączenie z serwerem pozostaje otwarte, ale interfejs nie wystartował. " +
+								"Sprawdź logs/game.log, aby zobaczyć, czy logowanie klienta się powiodło."
+							);
+						}
+					}, 60000);
+					await gamePlayer.ruffle().load({
+						url: new URL(
+							"pnz-city-container.swf?{{ update_time }}",
+							gameAssetsBase
+						).href,
+						parameters: {
+							config: new URL("/appconfig.xml", window.location.href).href,
+							versions: new URL(
+								"versions.json?{{ update_time }}",
+								gameAssetsBase
+							).href,
+							appSwf: new URL(
+								"pnz-city.swf?{{ update_time }}",
+								gameAssetsBase
+							).href
+						},
+						allowScriptAccess: true,
+						allowFullscreen: true,
+						allowNetworking: "all",
+						wmode: "transparent",
+						autoplay: "on"
+					});
+				} catch {
+					showStartError(
+						"Nie udało się uruchomić gry. Sprawdź połączenie z internetem " +
+						"oraz logi serwera."
+					);
+				}
+			})();
+        }
+    </script>
+	{% endif %}
+
+
+	<div id="dropDownSelect1"></div>
+</body>
+</html>

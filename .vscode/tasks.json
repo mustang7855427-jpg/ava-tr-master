@@ -1,0 +1,57 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Python: compile server modules",
+            "type": "process",
+            "command": "${workspaceFolder}\\.venv-app\\Scripts\\python.exe",
+            "args": [
+                "-m",
+                "py_compile",
+                "web.py",
+                "server.py",
+                "utils\\payment_webhook.py",
+                "utils\\server_logging.py"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Python: test payment webhook",
+            "type": "process",
+            "command": "${workspaceFolder}\\.venv-app\\Scripts\\python.exe",
+            "args": [
+                "-m",
+                "unittest",
+                "discover",
+                "-s",
+                "tests",
+                "-p",
+                "test_payment_webhook.py",
+                "-v"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "PowerShell: parse local startup script",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoLogo",
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                "$file = Join-Path (Get-Location) 'Start_Tortunga_Local.ps1'; $tokens = $null; $errors = $null; [System.Management.Automation.Language.Parser]::ParseFile($file, [ref]$tokens, [ref]$errors) | Out-Null; if ($errors.Count -gt 0) { $errors | ForEach-Object { Write-Error $_.Message }; exit 1 }; Write-Output 'PowerShell syntax OK'"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

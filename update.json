@@ -1,0 +1,7 @@
+{"ignore": ["data/config_sp_en.zip", "data/config_sp_pl.zip",
+"music/Ocean.mp3", "music/Tropics.mp3", "swf/landscape.swf",
+"swf/textLayout_2.0.0.232.swz", "swf/UiLang.swf", "swf/ClubHwn.swf",
+"swf/NewYear2014.swf", "swf/events/landscapeNY.swf", "swf/Pets.swf",
+"swf/TreasureSounds.swf", "swf/Treasure.swf", "house/RoomBase.swf"],
+"misc": ["promo/error/ErrorMessageBg.png",
+"music/SkiResort.mp3"]}

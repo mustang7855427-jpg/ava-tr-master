@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+        content="Regulamin serwera Tortuga i informacje dla graczy Avatarion.">
+  <title>Regulamin — Tortuga / Avatarion</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font: 16px/1.6 "Segoe UI", sans-serif;
+      color: #20283a;
+      background: #f3f5fa;
+    }
+    body { margin: 0; }
+    main {
+      max-width: 860px;
+      margin: 32px auto;
+      padding: 28px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px #18264a18;
+    }
+    h1, h2 { color: #344b8e; line-height: 1.25; }
+    h1 { margin-top: 0; }
+    section { margin: 28px 0; }
+    li { margin: 14px 0; padding-left: 4px; }
+    code {
+      overflow-wrap: anywhere;
+      padding: 2px 6px;
+      background: #eef2ff;
+      border-radius: 4px;
+    }
+    .notice {
+      padding: 14px 18px;
+      background: #eef2ff;
+      border-left: 4px solid #465fba;
+      border-radius: 6px;
+    }
+    .warning {
+      background: #fff6df;
+      border-left-color: #c17a00;
+    }
+    a { color: #344b8e; }
+    nav { margin-top: 28px; }
+    @media (max-width: 600px) {
+      main { margin: 0; padding: 22px 18px; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <nav><a href="/">Tortuga — strona główna</a></nav>
+  <h1>Regulamin serwera Avatarion</h1>
+  <p>
+    Avatarion to społecznościowy świat online, w którym tworzysz awatar,
+    urządzasz jego dom, odwiedzasz lokacje i spotykasz innych graczy.
+    Możesz rozmawiać, wykonywać zadania i brać udział w aktywnościach gry.
+  </p>
+
+  <section aria-labelledby="connection-heading">
+    <h2 id="connection-heading">Z czym łączy się gra?</h2>
+    <p>
+      Adres tej instancji:
+      <code>{{ public_base_url|e }}</code>
+    </p>
+    <p>
+      Po zalogowaniu kliknij „Uruchom grę”. Klient łączy się z serwerem
+      przez tę samą usługę, za pomocą
+      {% if public_base_url.startswith("https://") %}
+      szyfrowanego połączenia WSS
+      {% else %}
+      połączenia WebSocket
+      {% endif %}
+      pod adresem <code>{{ public_base_url|e }}/game-socket</code>.
+      Usługa przekazuje połączenie do wewnętrznego serwera gry.
+    </p>
+    <p>
+      Nie wpisuj adresu serwera ani hasła na stronach osób trzecich.
+      Nie łącz się bezpośrednio z portem gry ani z bazą danych — te usługi
+      nie są przeznaczone do publicznego dostępu.
+    </p>
+    {% if local_server %}
+    <p class="notice warning" role="note">
+      Ten adres wskazuje serwer lokalny. Jest dostępny tylko na komputerze,
+      na którym działa usługa — gracze z internetu nie mogą się z nim połączyć.
+    </p>
+    {% endif %}
+    {% if demo_mode %}
+    <p class="notice warning" role="note">
+      To środowisko działa w trybie demonstracyjnym. Zawiera zasoby zastępcze,
+      a nie pełną grę Avataria; nie służy do rozgrywki ani przechowywania
+      prawdziwych kont graczy.
+    </p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="start-heading">
+    <h2 id="start-heading">Jak zacząć?</h2>
+    <ol>
+      <li>Zaloguj się albo utwórz konto na tej stronie.</li>
+      <li>Kliknij „Uruchom grę” i poczekaj na połączenie z serwerem.</li>
+      <li>
+        Stwórz i ubierz awatar, odwiedzaj lokacje, poznawaj graczy,
+        urządzaj dom oraz odkrywaj zadania i wydarzenia.
+      </li>
+      <li>
+        Traktuj innych z szacunkiem i nie udostępniaj swoich danych
+        logowania ani prywatnych danych.
+      </li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="rules-heading">
+    <h2 id="rules-heading">Zasady społeczności</h2>
+    <ol>
+      <li>
+        <strong>Szacunek i kultura na czacie.</strong>
+        Szanuj innych graczy i dbaj o dobrą atmosferę. Zabronione są
+        wyzwiska, hejt, nękanie, wyśmiewanie i wulgaryzmy.
+      </li>
+      <li>
+        <strong>Zakaz reklam i spamu.</strong>
+        Nie wysyłaj spamu ani niepożądanych linków i nie reklamuj
+        zewnętrznych stron, serwerów lub grup bez zgody administracji.
+      </li>
+      <li>
+        <strong>Ochrona danych osobowych (RODO).</strong>
+        Nie publikuj ani nie udostępniaj danych osobowych innych graczy,
+        takich jak numery telefonów, adresy, nazwiska czy prywatne zdjęcia.
+      </li>
+      <li>
+        <strong>Zakaz szkodliwych programów i cheatów.</strong>
+        Nie wysyłaj linków do podejrzanych programów ani wirusów i nie używaj
+        oprogramowania modyfikującego rozgrywkę.
+      </li>
+      <li>
+        <strong>Zakaz podszywania się pod administrację.</strong>
+        Nie podszywaj się pod dewelopera, administratorów ani moderatorów,
+        używając podobnych nazw lub awatarów albo udając członka ekipy.
+      </li>
+      <li>
+        <strong>Decyzje administracji są ostateczne.</strong>
+        Administracja może nałożyć wyciszenie (MUTE), wyrzucenie z serwera
+        (KICK) lub blokadę konta albo adresu IP (BAN) na osoby łamiące
+        regulamin albo utrudniające rozgrywkę.
+      </li>
+    </ol>
+    <p class="notice">
+      Łamanie zasad może skutkować ograniczeniem dostępu do serwera.
+      W przypadku pytań lub problemów skontaktuj się z administracją.
+    </p>
+  </section>
+
+  <section aria-labelledby="privacy-heading">
+    <h2 id="privacy-heading">Dane techniczne i blokady</h2>
+    <p>
+      W celu ochrony serwera zapisywany jest skrót HMAC adresu IP użytego
+      podczas połączenia z grą, a nie surowy adres w bazie Redis. Historia
+      ostatniego połączenia jest przechowywana do 90 dni; identyfikator
+      aktywnej blokady IP pozostaje do jej wygaśnięcia lub zdjęcia. Blokada
+      może objąć inne osoby korzystające z tego samego łącza.
+    </p>
+  </section>
+
+  <nav>
+    <a href="/">Powrót do gry lub logowania</a>
+  </nav>
+</main>
+</body>
+</html>

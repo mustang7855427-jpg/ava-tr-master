@@ -1,0 +1,11 @@
+bitstring<5
+redis
+lxml
+aiohttp
+aiohttp_session
+aiohttp_jinja2
+cryptography
+Authlib
+joserfc
+pywebview
+psutil

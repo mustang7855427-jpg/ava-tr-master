@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ustawienie właściciela — Tortuga</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font: 16px/1.6 "Segoe UI", sans-serif;
+      color: #e8eef8;
+      background: #07111f;
+    }
+    body { margin: 0; }
+    main {
+      width: min(620px, calc(100% - 32px));
+      margin: 10vh auto;
+      padding: 28px;
+      border: 1px solid #2a3d55;
+      border-radius: 18px;
+      background: #111e30;
+      box-shadow: 0 22px 70px #0005;
+    }
+    h1 { margin-top: 0; color: #fff; }
+    p { color: #a9bad0; }
+    label { display: grid; gap: 8px; margin: 20px 0; }
+    input, button {
+      padding: 12px 14px;
+      border: 1px solid #354b67;
+      border-radius: 9px;
+      color: #fff;
+      background: #0a1626;
+      font: inherit;
+    }
+    button {
+      border: 0;
+      background: #326ee8;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    a { color: #8bc4ff; }
+    .warning {
+      padding: 14px;
+      border: 1px solid #715b2d;
+      border-radius: 10px;
+      background: #382d17;
+      color: #ffe2a1;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Ustaw właściciela serwera</h1>
+  <p class="warning">
+    To jednorazowe przypisanie lokalne. Po zatwierdzeniu tylko to konto
+    będzie mogło zarządzać panelem właściciela. Upewnij się, że UID
+    {{ uid|e }} należy do Ciebie.
+  </p>
+  <form method="post" action="/admin/claim">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token|e }}">
+    <label for="confirmation">
+      Wpisz <strong>USTAW WŁAŚCICIELA</strong>, aby potwierdzić
+      <input id="confirmation" name="confirmation" required
+        autocomplete="off">
+    </label>
+    <button type="submit">Przypisz moje konto jako właściciela</button>
+  </form>
+  <p><a href="/">Wróć na stronę Tortuga</a></p>
+</main>
+</body>
+</html>

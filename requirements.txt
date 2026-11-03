@@ -1,0 +1,14 @@
+pre-commit
+# game server
+bitstring<5
+redis
+lxml
+# web
+aiohttp
+aiohttp_session
+aiohttp_jinja2
+cryptography
+Authlib
+joserfc
+# bots
+aiogram
