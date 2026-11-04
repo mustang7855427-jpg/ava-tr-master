@@ -1,38 +1,18 @@
 services:
   - type: web
-    name: avataria-web-prod
-    runtime: python
-    plan: 1c-2g
+    name: wyspy-social-game
+    runtime: node
+    plan: free
     region: frankfurt
-    buildCommand: python -m pip install -r requirements-render.txt && python -m unittest discover -s tests -v
-    startCommand: python -u render_start.py
+    rootDir: social-game
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
     healthCheckPath: /healthz
+    autoDeployTrigger: commit
     envVars:
-      - key: RENDER_DEPLOYMENT
-        value: "true"
-      - key: WEB_BIND_HOST
-        value: 0.0.0.0
-      - key: GAME_BIND_HOST
-        value: 127.0.0.1
-      - key: GAME_SERVER_HOST
-        value: 127.0.0.1
-      - key: GAME_ASSETS_URL
-        sync: false
-      - key: RUFFLE_BASE_URL
-        value: https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle@0.7.1/
-      - key: DEMO_MODE
-        value: "false"
-      - key: ALLOW_REGISTRATION
-        value: "false"
-      - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: avataria-data-prod
-          property: connectionString
-
-  - type: keyvalue
-    name: avataria-data-prod
-    plan: 1g
-    region: frankfurt
-    ipAllowList: []
-    maxmemoryPolicy: noeviction
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_SETUP_KEY
+        generateValue: true
+      - key: DATABASE_PATH
+        value: ./data/world.sqlite
