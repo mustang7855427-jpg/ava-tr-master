@@ -19,6 +19,7 @@ from urllib.parse import urljoin, urlsplit
 
 import aiohttp
 import redis
+import common
 
 
 ROOT = Path(__file__).resolve().parent
@@ -92,14 +93,13 @@ def _public_base_url():
         os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
         or os.environ.get("RENDER_EXTERNAL_URL", "").strip().rstrip("/")
     )
-    parsed = urlsplit(public_url)
-    if (parsed.scheme != "https" or not parsed.hostname
-            or parsed.path or parsed.query or parsed.fragment
-            or parsed.username or parsed.password):
+    try:
+        common.parse_https_origin(public_url)
+    except ValueError as error:
         raise RuntimeError(
             "Set PUBLIC_BASE_URL to the HTTPS custom domain or ensure "
-            "Render provides RENDER_EXTERNAL_URL."
-        )
+            "Render provides RENDER_EXTERNAL_URL with a valid optional port."
+        ) from error
     return public_url
 
 
@@ -261,8 +261,13 @@ def main():
     signal.signal(signal.SIGTERM, _request_stop)
     signal.signal(signal.SIGINT, _request_stop)
 
-    if os.environ.get("RENDER_DEPLOYMENT") != "true":
+    if (os.environ.get("RENDER") != "true"
+            and os.environ.get("RENDER_DEPLOYMENT") != "true"):
         raise RuntimeError("render_start.py is only for Render deployments.")
+    if os.environ.get("DEMO_MODE", "").strip().lower() != "false":
+        raise RuntimeError(
+            "Production Render deployments require DEMO_MODE=false."
+        )
 
     asyncio.run(_prepare_game_config())
     child_environment = os.environ.copy()

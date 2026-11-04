@@ -1,6 +1,28 @@
 import errno
 import logging
 import ipaddress
+from urllib.parse import SplitResult, urlsplit
+
+
+def parse_https_origin(value: str) -> SplitResult:
+    try:
+        parsed = urlsplit(value)
+        parsed.port
+    except ValueError as error:
+        raise ValueError(
+            "Expected an HTTPS origin with a valid optional port."
+        ) from error
+
+    if (parsed.scheme != "https" or not parsed.hostname
+            or parsed.netloc.endswith(":")
+            or any(character.isspace() for character in value)
+            or parsed.path or parsed.query or parsed.fragment
+            or parsed.username is not None or parsed.password is not None):
+        raise ValueError(
+            "Expected an HTTPS origin without credentials, path, query, "
+            "or fragment."
+        )
+    return parsed
 
 
 def format_os_error(error):
