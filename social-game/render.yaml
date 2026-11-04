@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: wyspy-social-game
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: social-game
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_SETUP_KEY
+        generateValue: true
+      - key: DATABASE_PATH
+        value: ./data/world.sqlite

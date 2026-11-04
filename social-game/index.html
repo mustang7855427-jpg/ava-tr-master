@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#183c50">
+    <meta name="description" content="Autorski, społecznościowy świat wysp.">
+    <title>Wyspy — świat spotkań</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Wyspy — strona główna">
+          <span class="brand-mark" aria-hidden="true">W</span>
+          <span>WYSPY <small>świat spotkań</small></span>
+        </a>
+        <div id="player-label" class="player-label"></div>
+      </header>
+      <main>
+        <section id="auth-view" class="auth-layout">
+          <div class="welcome panel">
+            <p class="eyebrow">OTWARTY ŚWIAT • DOBRZY LUDZIE • WŁASNE MIEJSCE</p>
+            <h1>Twoja wyspa<br><em>czeka na Ciebie.</em></h1>
+            <p>Wskocz do kolorowego świata, spotkaj sąsiadów i urządź swój własny kąt.</p>
+            <div class="sunset-art" aria-hidden="true"><span>☀</span><i></i><b></b></div>
+          </div>
+          <form id="auth-form" class="auth-card panel">
+            <p class="eyebrow">DOŁĄCZ DO ŚWIATA</p>
+            <h2 id="auth-title">Miło Cię widzieć!</h2>
+            <label>Nazwa gracza<input name="username" minlength="3" maxlength="24" autocomplete="username" required></label>
+            <label>Hasło<input name="password" type="password" minlength="10" autocomplete="current-password" required></label>
+            <button id="auth-submit" class="button primary" type="submit">Wejdź na wyspę</button>
+            <button id="auth-switch" class="button secondary" type="button">Załóż nowe konto</button>
+            <p id="auth-message" class="feedback" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section id="world-view" class="world-layout" hidden>
+          <aside class="sidebar panel">
+            <div class="sidebar-heading"><div><p class="eyebrow">WYBIERZ MIEJSCE</p><h2>Wyspy</h2></div><span class="online-dot"></span></div>
+            <nav id="room-list" class="room-list" aria-label="Pokoje"></nav>
+            <div class="side-divider"></div>
+            <div class="furniture-heading"><div><p class="eyebrow">URZĄDŹ POKÓJ</p><h2>Sklep z meblami</h2></div><button id="clear-placement" class="icon-button" title="Anuluj wybór mebla" aria-label="Anuluj wybór mebla">×</button></div>
+            <div id="furniture-list" class="furniture-list"></div>
+            <p class="side-hint">Kup mebel za monety, wybierz go i kliknij miejsce w pokoju. Kliknij swój mebel, aby go schować do plecaka.</p>
+            <div class="avatar-customizer">
+              <p class="eyebrow">DOPASUJ AWATARA</p>
+              <label>Ubranie<div id="avatar-colors" class="avatar-options" role="group" aria-label="Kolor ubrania"></div></label>
+              <label>Odcień skóry<div id="skin-tones" class="avatar-options" role="group" aria-label="Odcień skóry"></div></label>
+              <label>Włosy<div id="hair-colors" class="avatar-options" role="group" aria-label="Kolor włosów"></div></label>
+              <label>Fryzura<div id="hair-styles" class="avatar-options hair-style-options" role="group" aria-label="Fryzura"></div></label>
+            </div>
+            <button id="daily-reward" class="button secondary daily-reward" type="button">Odbierz 100 dziennych monet</button>
+            <button id="admin-open" class="button secondary admin-open" type="button" hidden>Panel administratora</button>
+            <button id="logout" class="text-button" type="button">Wyloguj</button>
+          </aside>
+          <section class="room-panel panel">
+            <div class="room-toolbar">
+              <div><p class="eyebrow">TERAZ ODWIEDZASZ</p><h1 id="room-title">Rynek Słoneczny</h1></div>
+              <p id="room-count" class="room-count">0 graczy</p>
+            </div>
+            <div id="game-container" class="game-container" aria-label="Pokój gry 2D"></div>
+            <div class="room-caption"><span>⌨ Poruszaj się klawiszami WASD lub strzałkami</span><span>✦ Kliknij pokój, żeby przejść</span></div>
+          </section>
+          <aside class="chat-panel panel">
+            <div class="chat-heading"><div><p class="eyebrow">NA ŻYWO</p><h2>Rozmowy</h2></div><span id="chat-status">Łączenie…</span></div>
+            <ol id="chat-messages" class="chat-messages" aria-live="polite" aria-label="Wiadomości czatu"></ol>
+            <form id="chat-form" class="chat-form"><label class="sr-only" for="chat-input">Wiadomość</label><input id="chat-input" maxlength="240" autocomplete="off" placeholder="Napisz coś miłego…" required><button class="send-button" type="submit" aria-label="Wyślij">➤</button></form>
+          </aside>
+        </section>
+
+        <section id="admin-view" class="admin-view panel" hidden>
+          <div class="admin-heading"><div><p class="eyebrow">TWOJE NARZĘDZIA</p><h1>Panel administratora</h1></div><button id="admin-close" class="button secondary" type="button">Wróć do świata</button></div>
+          <div class="admin-stats">
+            <article><span>Gracze online</span><strong id="stat-online">0</strong></article>
+            <article><span>Wszystkie konta</span><strong id="stat-users">0</strong></article>
+            <article><span>Pokoje</span><strong id="stat-rooms">0</strong></article>
+          </div>
+          <section class="admin-room-management">
+            <h2>Meble w pokojach</h2>
+            <div id="admin-rooms" class="admin-room-list"></div>
+          </section>
+          <div class="admin-columns">
+            <section><h2>Gracze</h2><div class="table-wrap"><table><thead><tr><th>Gracz</th><th>Ranga</th><th>Akcje</th></tr></thead><tbody id="admin-users"></tbody></table></div></section>
+            <section><h2>Ogłoszenie dla wszystkich</h2><form id="broadcast-form"><label class="sr-only" for="broadcast-text">Treść ogłoszenia</label><textarea id="broadcast-text" maxlength="300" required placeholder="Wiadomość widoczna w każdym pokoju"></textarea><button class="button primary" type="submit">Wyślij ogłoszenie</button></form><p id="admin-message" class="feedback" aria-live="polite"></p></section>
+          </div>
+        </section>
+      </main>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
