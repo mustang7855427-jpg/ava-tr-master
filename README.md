@@ -73,7 +73,9 @@ W repozytorium znajdują się `render.yaml`, `render_start.py` i
 WWW Render (HTTPS/WSS). Serwer gry TCP działa w tym samym kontenerze, ale
 nasłuchuje wyłącznie na `127.0.0.1:8123`; Redis Key Value nie jest wystawiony
 publicznie. `render_start.py` uruchamia serwer gry przed WWW i kończy usługę,
-jeśli którykolwiek proces przestanie działać.
+jeśli którykolwiek proces przestanie działać. Przekazuje procesom
+`RENDER_DEPLOYMENT=true`, domyślnie wystawia WWW przez `0.0.0.0`, a TLS kończy
+Render.
 
 Blueprint używa darmowych planów Render dla WWW i Key Value, więc nadaje się
 do testów, nie do trwałej gry produkcyjnej. Darmowa usługa WWW usypia się po

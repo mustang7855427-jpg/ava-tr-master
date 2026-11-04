@@ -1488,7 +1488,8 @@ async def main():
         raise RuntimeError(
             "Publiczne nasłuchiwanie WWW wymaga TLS albo zaufanego "
             "terminowania TLS przez Render.")
-    elif app["public_base_url"].startswith("https://"):
+    elif (app["public_base_url"].startswith("https://")
+          and not RENDER_DEPLOYMENT):
         raise ValueError("Adres HTTPS wymaga skonfigurowania TLS.")
     aiohttp_session.setup(
         app, EncryptedCookieStorage(secret_key,

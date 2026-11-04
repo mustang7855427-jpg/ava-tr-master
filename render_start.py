@@ -310,6 +310,8 @@ def main():
         _game_assets_url()
         asyncio.run(_prepare_game_config())
     child_environment = os.environ.copy()
+    child_environment["RENDER_DEPLOYMENT"] = "true"
+    child_environment.setdefault("WEB_BIND_HOST", "0.0.0.0")
     child_environment["PUBLIC_BASE_URL"] = _public_base_url()
     _wait_for_redis()
     children = []
