@@ -38,9 +38,11 @@ import common
 
 ROOT = Path(__file__).resolve().parent
 FILES_DIR = ROOT / "files"
+DEMO_ASSETS_DIR = ROOT / "demo-assets"
 RUFFLE_DIR = FILES_DIR / "ruffle"
 RUFFLE_WASM_RE = re.compile(r'e\.exports=a\.p\+"([^"]+\.wasm)"')
 GAME_SERVER_PORT = 8123
+DEMO_MODE = os.environ.get("DEMO_MODE") == "true"
 GAME_ASSETS_URL = os.environ.get("GAME_ASSETS_URL", "").strip().rstrip("/")
 if GAME_ASSETS_URL:
     assets_url = urlsplit(GAME_ASSETS_URL)
@@ -52,7 +54,9 @@ if GAME_ASSETS_URL:
             "query, or fragment."
         )
 GAME_ASSETS_BASE_URL = (
-    f"{GAME_ASSETS_URL}/" if GAME_ASSETS_URL else "/files/"
+    f"{GAME_ASSETS_URL}/" if GAME_ASSETS_URL
+    else "/demo-assets/" if DEMO_MODE
+    else "/files/"
 )
 RUFFLE_BASE_URL = os.environ.get("RUFFLE_BASE_URL", "").strip()
 if RUFFLE_BASE_URL:
@@ -68,11 +72,12 @@ RUFFLE_BASE_URL = (
     f"{RUFFLE_BASE_URL.rstrip('/')}/"
     if RUFFLE_BASE_URL else f"{GAME_ASSETS_BASE_URL}ruffle/"
 )
-DEMO_MODE = os.environ.get("DEMO_MODE") == "true"
 
 routes = web.RouteTableDef()
 if FILES_DIR.is_dir():
     routes.static("/files", str(FILES_DIR))
+if DEMO_ASSETS_DIR.is_dir():
+    routes.static("/demo-assets", str(DEMO_ASSETS_DIR))
 TRUSTED_PROXY_CIDRS = os.environ.get("TRUSTED_PROXY_CIDRS", "").strip()
 try:
     TRUSTED_PROXY_NETWORKS = tuple(
@@ -253,6 +258,8 @@ if GOOGLE_OAUTH_ENABLED:
 
 
 def _ruffle_assets_available():
+    if DEMO_MODE:
+        return True
     if GAME_ASSETS_URL:
         return True
 
@@ -1413,7 +1420,8 @@ async def admin_action(request):
 
 async def main():
     global app
-    if RENDER_DEPLOYMENT and not GAME_ASSETS_URL and not FILES_DIR.is_dir():
+    if (RENDER_DEPLOYMENT and not DEMO_MODE
+            and not GAME_ASSETS_URL and not FILES_DIR.is_dir()):
         raise RuntimeError(
             "Set GAME_ASSETS_URL to an HTTPS directory containing the "
             "authorized game assets before deploying without files/."

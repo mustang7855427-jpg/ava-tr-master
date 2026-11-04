@@ -257,6 +257,37 @@ async def _prepare_game_config():
     _extract_game_config(archive_content, destination)
 
 
+def _prepare_demo_game_config():
+    destination = ROOT / "config_fb_tr"
+    if destination.is_dir():
+        return
+
+    assets_root = ROOT / "demo-assets"
+    manifest_path = assets_root / "versions.json"
+    try:
+        manifest_content = manifest_path.read_bytes()
+    except OSError as error:
+        raise RuntimeError(
+            "The synthetic demo asset manifest is not available."
+        ) from error
+
+    archive_url = _config_archive_url(
+        "https://demo-assets.invalid", manifest_content
+    )
+    archive_name = urlsplit(archive_url).path.rsplit("/", 1)[-1]
+    archive_path = assets_root / "data" / archive_name
+    try:
+        archive_content = archive_path.read_bytes()
+    except OSError as error:
+        raise RuntimeError(
+            "The synthetic demo game config archive is not available."
+        ) from error
+    if len(archive_content) > MAX_CONFIG_DOWNLOAD_SIZE:
+        raise RuntimeError("The synthetic demo game config archive is too large.")
+
+    _extract_game_config(archive_content, destination)
+
+
 def main():
     signal.signal(signal.SIGTERM, _request_stop)
     signal.signal(signal.SIGINT, _request_stop)
@@ -264,12 +295,20 @@ def main():
     if (os.environ.get("RENDER") != "true"
             and os.environ.get("RENDER_DEPLOYMENT") != "true"):
         raise RuntimeError("render_start.py is only for Render deployments.")
-    if os.environ.get("DEMO_MODE", "").strip().lower() != "false":
-        raise RuntimeError(
-            "Production Render deployments require DEMO_MODE=false."
+    demo_mode = os.environ.get("DEMO_MODE", "").strip().lower() == "true"
+    if demo_mode:
+        logging.warning(
+            "Starting in public demo mode with synthetic assets; "
+            "this is not a playable Avataria client."
         )
-
-    asyncio.run(_prepare_game_config())
+        _prepare_demo_game_config()
+    else:
+        if os.environ.get("OWNER_UID", "").strip() != "5":
+            raise RuntimeError(
+                "Production Render deployments require OWNER_UID=5."
+            )
+        _game_assets_url()
+        asyncio.run(_prepare_game_config())
     child_environment = os.environ.copy()
     child_environment["PUBLIC_BASE_URL"] = _public_base_url()
     _wait_for_redis()

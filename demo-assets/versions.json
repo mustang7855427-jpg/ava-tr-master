@@ -1,9 +1,9 @@
 {
   "data/config_fb_pl.zip": "a65f00f088feac13db1d92bdf2530565",
   "data/config_fb_tr.zip": "a65f00f088feac13db1d92bdf2530565",
-  "swf/AvatarAnimation.swf": "9cf33d950b3b87a1a8f6a5aaec7b977c",
-  "swf/AvatarIcons.swf": "9cf33d950b3b87a1a8f6a5aaec7b977c",
-  "swf/Ui.swf": "9cf33d950b3b87a1a8f6a5aaec7b977c",
-  "swf/UiInit.swf": "9cf33d950b3b87a1a8f6a5aaec7b977c",
-  "swf/UiLang_pl.swf": "9cf33d950b3b87a1a8f6a5aaec7b977c"
+  "swf/AvatarAnimation.swf": "7cfe6c6e7156153d400666beea928d84",
+  "swf/AvatarIcons.swf": "949896ff3cd1d078a23436a3e040d5ec",
+  "swf/Ui.swf": "13694f570e30c02a9ad1b3cb5accdc26",
+  "swf/UiInit.swf": "e5d0d3bd174a4ff7bd977cc88707915a",
+  "swf/UiLang_pl.swf": "a67e948e45bf18a7a537229ed7bcff56"
 }

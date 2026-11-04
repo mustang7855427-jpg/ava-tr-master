@@ -276,7 +276,8 @@
 				proxyUrl: gameSocketUrl.href
 			}]
 		};
-		if (pageConfig.loggedIn === "true"
+		if (pageConfig.demoMode !== "true"
+				&& pageConfig.loggedIn === "true"
 				&& pageConfig.ruffleAvailable === "true") {
 			const ruffleScript = document.createElement("script");
 			ruffleScript.src = new URL("ruffle.js", ruffleAssetsBase).href;
@@ -525,23 +526,6 @@
 				).href;
 			});
 			const files = [
-				new URL("ruffle.js", ruffleAssetsBase).href,
-				new URL(
-					"core.ruffle.16d61072ac7fdc4d5013.js",
-					ruffleAssetsBase
-				).href,
-				new URL(
-					"core.ruffle.994eeef0a471a88cd0e3.js",
-					ruffleAssetsBase
-				).href,
-				new URL(
-					"172de42e6619eac8f371.wasm",
-					ruffleAssetsBase
-				).href,
-				new URL(
-					"878d548199cddef07035.wasm",
-					ruffleAssetsBase
-				).href,
 				new URL(
 					"pnz-city-container.swf?" + pageConfig.updateTime,
 					gameAssetsBase
@@ -553,6 +537,21 @@
 				"/appconfig.xml",
 				...versionedFiles
 			];
+			if (pageConfig.demoMode !== "true") {
+				files.unshift(
+					new URL("ruffle.js", ruffleAssetsBase).href,
+					new URL(
+						"core.ruffle.16d61072ac7fdc4d5013.js",
+						ruffleAssetsBase
+					).href,
+					new URL(
+						"core.ruffle.994eeef0a471a88cd0e3.js",
+						ruffleAssetsBase
+					).href,
+					new URL("172de42e6619eac8f371.wasm", ruffleAssetsBase).href,
+					new URL("878d548199cddef07035.wasm", ruffleAssetsBase).href
+				);
+			}
 			for (let index = 0; index < files.length; index += 1) {
 				const response = await fetch(files[index], {
 					method: "HEAD",
@@ -636,8 +635,9 @@
 		}
 
         function start(){
-            if (!window.RufflePlayer
-					|| typeof window.RufflePlayer.newest !== "function") {
+			if (pageConfig.demoMode !== "true"
+					&& (!window.RufflePlayer
+						|| typeof window.RufflePlayer.newest !== "function")) {
 				showStartError(
 					"Nie udało się załadować Ruffle z wybranego źródła zasobów. " +
 					"Sprawdź GAME_ASSETS_URL, CORS i plik ruffle/ruffle.js."
@@ -683,8 +683,8 @@
 							100, "Test zasobów i endpointu serwera zakończony"
 						);
 						gameStatus.textContent =
-							"Zasoby zastępcze i endpoint serwera odpowiadają. " +
-							"Puste SWF-y nie zawierają interfejsu gry ani rozgrywki.";
+							"Zasoby demonstracyjne i endpoint serwera odpowiadają. " +
+							"Syntetyczne SWF-y nie zawierają klienta ani rozgrywki.";
 						gameButton.hidden = false;
 						gameButton.disabled = false;
 						gameButton.value = "Uruchom test ponownie";

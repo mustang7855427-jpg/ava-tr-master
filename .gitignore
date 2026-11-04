@@ -14,3 +14,5 @@ logs/
 /files/
 /config_fb_tr/
 *.swf
+!/demo-assets/*.swf
+!/demo-assets/swf/*.swf
