@@ -1,5 +1,13 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl"
+	data-asset-base-url="{{ asset_base_url|e }}"
+	data-ruffle-base-url="{{ ruffle_base_url|e }}"
+	data-public-base-url="{{ public_base_url|e }}"
+	data-game-socket-host="{{ game_socket_host|e }}"
+	data-demo-mode="{{ 'true' if demo_mode else 'false' }}"
+	data-logged-in="{{ 'true' if logged_in else 'false' }}"
+	data-ruffle-available="{{ 'true' if ruffle_available else 'false' }}"
+	data-update-time="{{ update_time|default('')|e }}">
 <head>
 	<title>Tortuga — serwer Avatarion</title>
 	<meta charset="UTF-8">
@@ -245,30 +253,36 @@
 			#flashContent ruffle-player { min-height: 360px; }
 		}
 	</style>
-	{% if token and ruffle_available %}
 	<script>
+		const pageConfig = document.documentElement.dataset;
 		const gameAssetsBase = new URL(
-			{{ asset_base_url|tojson }}, window.location.href
+			pageConfig.assetBaseUrl, window.location.href
 		);
 		const ruffleAssetsBase = new URL(
-			{{ ruffle_base_url|tojson }}, window.location.href
+			pageConfig.ruffleBaseUrl, window.location.href
 		);
 		window.RufflePlayer = window.RufflePlayer || {};
-		const gameSocketUrl = new URL("/game-socket", {{ public_base_url|tojson }});
+		const gameSocketUrl = new URL(
+			"/game-socket", pageConfig.publicBaseUrl
+		);
 		gameSocketUrl.protocol =
 			window.location.protocol === "https:" ? "wss:" : "ws:";
 		window.RufflePlayer.config = {
 			publicPath: ruffleAssetsBase.href,
 			autoplay: "on",
 			socketProxy: [{
-				host: {{ game_socket_host|tojson }},
+				host: pageConfig.gameSocketHost,
 				port: 8123,
 				proxyUrl: gameSocketUrl.href
 			}]
 		};
+		if (pageConfig.loggedIn === "true"
+				&& pageConfig.ruffleAvailable === "true") {
+			const ruffleScript = document.createElement("script");
+			ruffleScript.src = new URL("ruffle.js", ruffleAssetsBase).href;
+			document.head.appendChild(ruffleScript);
+		}
 	</script>
-	<script src="{{ ruffle_base_url }}ruffle.js"></script>
-	{% endif %}
 </head>
 <body>
 	<div class="page-shell">
@@ -445,9 +459,9 @@
 		</footer>
 		{% endif %}
 	</div>
-	{% if token %}
 	<script>
 		const gameButton = document.getElementById("clickMe");
+		if (gameButton) {
 		const gameStatus = document.getElementById("gameStatus");
 		const gameProgress = document.getElementById("gameProgress");
 		const gameProgressFill = document.getElementById("gameProgressFill");
@@ -481,7 +495,10 @@
 
 		async function checkGameFiles() {
 			const manifestResponse = await fetch(
-				new URL("versions.json?{{ update_time }}", gameAssetsBase),
+				new URL(
+					"versions.json?" + pageConfig.updateTime,
+					gameAssetsBase
+				),
 				{ cache: "no-store" }
 			);
 			if (!manifestResponse.ok) {
@@ -526,10 +543,13 @@
 					ruffleAssetsBase
 				).href,
 				new URL(
-					"pnz-city-container.swf?{{ update_time }}",
+					"pnz-city-container.swf?" + pageConfig.updateTime,
 					gameAssetsBase
 				).href,
-				new URL("pnz-city.swf?{{ update_time }}", gameAssetsBase).href,
+				new URL(
+					"pnz-city.swf?" + pageConfig.updateTime,
+					gameAssetsBase
+				).href,
 				"/appconfig.xml",
 				...versionedFiles
 			];
@@ -651,23 +671,25 @@
 						);
 					}
 					const initialState = await statusResponse.json();
-					{% if demo_mode %}
-					if (!Number.isInteger(initialState.connections)
-							|| initialState.connections < 0
-							|| typeof initialState.connected !== "boolean") {
-						throw new Error(
-							"Serwer WWW zwrócił nieprawidłowy stan testowy."
+					if (pageConfig.demoMode === "true") {
+						if (!Number.isInteger(initialState.connections)
+								|| initialState.connections < 0
+								|| typeof initialState.connected !== "boolean") {
+							throw new Error(
+								"Serwer WWW zwrócił nieprawidłowy stan testowy."
+							);
+						}
+						setProgress(
+							100, "Test zasobów i endpointu serwera zakończony"
 						);
+						gameStatus.textContent =
+							"Zasoby zastępcze i endpoint serwera odpowiadają. " +
+							"Puste SWF-y nie zawierają interfejsu gry ani rozgrywki.";
+						gameButton.hidden = false;
+						gameButton.disabled = false;
+						gameButton.value = "Uruchom test ponownie";
+						return;
 					}
-					setProgress(100, "Test zasobów i endpointu serwera zakończony");
-					gameStatus.textContent =
-						"Zasoby zastępcze i endpoint serwera odpowiadają. " +
-						"Puste SWF-y nie zawierają interfejsu gry ani rozgrywki.";
-					gameButton.hidden = false;
-					gameButton.disabled = false;
-					gameButton.value = "Uruchom test ponownie";
-					return;
-					{% endif %}
 					if (!Number.isInteger(initialState.connections)
 							|| initialState.connections < 0) {
 						throw new Error("Serwer WWW zwrócił nieprawidłowy licznik połączeń.");
@@ -730,17 +752,17 @@
 					}, 60000);
 					await gamePlayer.ruffle().load({
 						url: new URL(
-							"pnz-city-container.swf?{{ update_time }}",
+							"pnz-city-container.swf?" + pageConfig.updateTime,
 							gameAssetsBase
 						).href,
 						parameters: {
 							config: new URL("/appconfig.xml", window.location.href).href,
 							versions: new URL(
-								"versions.json?{{ update_time }}",
+								"versions.json?" + pageConfig.updateTime,
 								gameAssetsBase
 							).href,
 							appSwf: new URL(
-								"pnz-city.swf?{{ update_time }}",
+								"pnz-city.swf?" + pageConfig.updateTime,
 								gameAssetsBase
 							).href
 						},
@@ -758,8 +780,8 @@
 				}
 			})();
         }
+		}
     </script>
-	{% endif %}
 
 
 	<div id="dropDownSelect1"></div>

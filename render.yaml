@@ -1,14 +1,12 @@
-# Free plans are for testing only: the web service sleeps when idle and the
-# Key Value instance does not persist data across restarts.
 services:
   - type: web
-    name: avataria-web
+    name: avataria-web-prod
     runtime: python
-    plan: free
+    plan: 1c-2g
     region: frankfurt
-    buildCommand: python -m pip install -r requirements-render.txt
+    buildCommand: python -m pip install -r requirements-render.txt && python -m unittest discover -s tests -v
     startCommand: python -u render_start.py
-    healthCheckPath: /
+    healthCheckPath: /healthz
     envVars:
       - key: RENDER_DEPLOYMENT
         value: "true"
@@ -19,28 +17,22 @@ services:
       - key: GAME_SERVER_HOST
         value: 127.0.0.1
       - key: GAME_ASSETS_URL
-        value: https://cdn.jsdelivr.net/gh/mustang7855427-jpg/avataria-serwer@main/demo-assets/
+        sync: false
       - key: RUFFLE_BASE_URL
         value: https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle@0.7.1/
       - key: DEMO_MODE
-        value: "true"
+        value: "false"
+      - key: ALLOW_REGISTRATION
+        value: "false"
       - key: REDIS_URL
         fromService:
           type: keyvalue
-          name: avataria-data
+          name: avataria-data-prod
           property: connectionString
-      - key: OWNER_UID
-        sync: false
-      - key: TRUSTED_PROXY_CIDRS
-        sync: false
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
 
   - type: keyvalue
-    name: avataria-data
-    plan: free
+    name: avataria-data-prod
+    plan: 1g
     region: frankfurt
     ipAllowList: []
     maxmemoryPolicy: noeviction
