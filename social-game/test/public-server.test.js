@@ -5,6 +5,7 @@ import fs from "node:fs";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import { io as createSocket } from "socket.io-client";
 import test from "node:test";
 
 async function unusedPort() {
@@ -32,10 +33,12 @@ test("public game APIs preserve account, rewards, inventory and avatar state", a
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
+  let socket;
   let output = "";
   child.stdout.setEncoding("utf8").on("data", (chunk) => { output += chunk; });
   child.stderr.setEncoding("utf8").on("data", (chunk) => { output += chunk; });
   context.after(async () => {
+    socket?.disconnect();
     child.kill("SIGTERM");
     await Promise.race([once(child, "exit"), new Promise((resolve) => setTimeout(resolve, 5_000))]);
     if (child.exitCode === null) child.kill("SIGKILL");
@@ -117,6 +120,28 @@ test("public game APIs preserve account, rewards, inventory and avatar state", a
   assert.equal(result.data.user.skinTone, "#9c624a");
   assert.equal(result.data.user.hairColor, "#403d62");
   assert.equal(result.data.user.hairStyle, "curly");
+  socket = createSocket(base, {
+    transports: ["websocket"],
+    extraHeaders: { Cookie: cookie },
+    reconnection: false,
+  });
+  await new Promise((resolve, reject) => {
+    socket.once("connect", resolve);
+    socket.once("connect_error", reject);
+  });
+  const joined = await new Promise((resolve, reject) => {
+    socket.timeout(3_000).emit("room:join", "sunny-square", (error, room) => {
+      if (error) reject(error);
+      else resolve(room);
+    });
+  });
+  assert.equal(joined.players[0].hairStyle, "curly");
+  const profileUpdate = new Promise((resolve) => socket.once("player:profile", resolve));
+  socket.emit("player:profile");
+  const syncedAppearance = await profileUpdate;
+  assert.equal(syncedAppearance.skinTone, "#9c624a");
+  assert.equal(syncedAppearance.hairColor, "#403d62");
+  assert.equal(syncedAppearance.hairStyle, "curly");
   assert.equal(
     (await request("/api/auth/profile", "PATCH", { hairStyle: "unknown" })).response.status,
     400,
